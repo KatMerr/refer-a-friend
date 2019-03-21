@@ -4,7 +4,7 @@ const ProductModel = require('../models/product');
 
 const router = new Router();
 
-router.route("/products")
+router.route("/")
 .get(ProductController.allProducts);
 
 module.exports = router;

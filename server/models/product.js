@@ -42,7 +42,7 @@ const productSchema = new Schema({
         imtesPicked: Number
     }
 },{
-    collection: 'Product'
+    collection: 'Products'
 });
 
-module.exports = mongoose.model('Product', productSchema);
+module.exports = mongoose.model('Products', productSchema);

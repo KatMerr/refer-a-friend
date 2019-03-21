@@ -3,9 +3,10 @@ const express = require('express' );
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const ProductRoutes = require('./routes/product.routes');
+const UserReferalRoutes = require('./routes/user-referal.routes');
 
 const path = require("path");
-const PORT = process.env.PORT || 8081;
+const PORT = process.env.SERVER_PORT || 8080;
 const DB_URI = process.env.DB_URI || "";
 
 const app = express();
@@ -21,7 +22,8 @@ if(DB_URI){
     console.log("No URI found");
 }
 
-app.use('/api', ProductRoutes);
+app.use('/api/products', ProductRoutes);
+app.use('/api/referals', UserReferalRoutes);
 
 app.use(express.static(path.join(__dirname, "build")));
 

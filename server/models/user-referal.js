@@ -7,12 +7,12 @@ const userReferalSchema = Schema({
         type: String,
         required: false
     },
-    referal_option: {
+    product: {
         type: Schema.Types.ObjectId,
-        ref: 'referal-option',
+        ref: 'Products',
         required: [true, "Must have reference to Product that the referal works with"]
     },
-    referal_identifier: {
+    product_identifier: {
         referal_URL: {
             type: String,
             match: urlRegex
@@ -33,7 +33,8 @@ const userReferalSchema = Schema({
     }
 }, {
     createdAt: 'created_at',
-    updatedAt: 'updated_at'
+    updatedAt: 'updated_at',
+    collection: 'UserReferals'
 });
 
 userReferalSchema.pre('validate', function(next){
@@ -47,4 +48,4 @@ userReferalSchema.virtual('identifier').get(function(){
     return this.referal_identifier.referal_URL || this.referal_code;
 });
 
-export default mongoose.model('UserReferal', userReferalSchema);
+module.exports =  mongoose.model('UserReferals', userReferalSchema);
