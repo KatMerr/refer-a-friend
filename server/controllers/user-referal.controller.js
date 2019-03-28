@@ -1,10 +1,10 @@
 const UserReferalModel = require('../models/user-referal');
 
 exports.getReferalsForProduct = function (req, res){
-    const product_id = req.params.productID;
-    if (product_id){
+    const productID = req.params.productID;
+    if (productID){
         UserReferalModel
-        .find({product: product_id})
+        .find({product: productID})
         .exec((err, referals) => {
             if (err) return res.send(500).send(err);
             res.json(referals);
@@ -20,6 +20,20 @@ exports.getAllReferals = function (req, res){
         .exec((err, referals) => {
             if (err) return res.send(500).send(err);
             res.json(referals)
+        });
+}
+
+exports.updateSingleReferal = function (req, res){
+    const doc = req.body;
+    const { productID, referalID } = req.params;
+    const query = {
+        product: productID,
+        _id: referalID
+    };
+    UserReferalModel
+        .findOneAndUpdate(query, doc)
+        .then((updatedDoc) => {
+            res.json(updatedDoc);
         });
 }
 

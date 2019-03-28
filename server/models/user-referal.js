@@ -12,14 +12,9 @@ const userReferalSchema = Schema({
         ref: 'Products',
         required: [true, "Must have reference to Product that the referal works with"]
     },
-    product_identifier: {
-        referal_URL: {
-            type: String,
-            match: urlRegex
-        },
-        referal_code: {
-            type: String,
-        }
+    referal_URL: {
+        type: String,
+        match: urlRegex
     },
     meta: {
         rolled: {

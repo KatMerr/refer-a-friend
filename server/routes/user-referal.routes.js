@@ -11,5 +11,9 @@ router.route('/')
 router.route('/:productID')
     .get(userReferalController.getReferalsForProduct);
 
+router.route('/:productID/:referalID')
+    .get()
+    .post(userReferalController.updateSingleReferal);
+
 
 module.exports = router;
