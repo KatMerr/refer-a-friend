@@ -12,9 +12,18 @@ const userReferalSchema = Schema({
         ref: 'Products',
         required: [true, "Must have reference to Product that the referal works with"]
     },
-    referal_URL: {
+    referalAmount: {
+        type: Number,
+        required: false
+    },
+    referalIdentifier: {
         type: String,
-        match: urlRegex
+        required: [true, "Must have an identifier, either a URL or a Referal Code"]
+    },
+    preferred: {
+        type: Boolean,
+        required: true,
+        default: false
     },
     meta: {
         rolled: {
@@ -30,17 +39,6 @@ const userReferalSchema = Schema({
     createdAt: 'created_at',
     updatedAt: 'updated_at',
     collection: 'UserReferals'
-});
-
-userReferalSchema.pre('validate', function(next){
-    let hasValidator = false;
-    hasValidator = !!(this.referal_identifier.referal_URL | this.referal_identifier.referal_code);
-
-    return hasValidator;
-})
-
-userReferalSchema.virtual('identifier').get(function(){
-    return this.referal_identifier.referal_URL || this.referal_code;
 });
 
 module.exports =  mongoose.model('UserReferals', userReferalSchema);

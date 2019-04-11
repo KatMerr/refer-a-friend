@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react'
-import styled, { keyframes } from 'styled-components'
+import styled from 'styled-components'
 
-//Currently breaks when its spinning and you try to clear the product
+//This needs more work
 //Not spinning again when user requests a new referal.
 
-const fastSpinTime = 200;
-const medSpinTime = 300;
-const slowSpinTime = 500;
+//Spin times
+const SPIN_TIMES = {
+    FAST: 200,
+    MEDIUM: 300,
+    SLOW: 500
+};
 
 const SpinContainer = styled.div`
     position: relative;
@@ -21,20 +24,20 @@ const SpinOption = styled.span`
     top: -100%;
     left: 50%;
     transform: translateX(-50%);
-
+    
     &.spinning-fast {
         top: 100%;
-        transition: all ${fastSpinTime + "ms"} linear;
+        transition: all ${SPIN_TIMES.FAST + "ms"} linear;
     }
 
     &.spinning-med {
         top: 100%;
-        transition: all ${medSpinTime + "ms"} linear;
+        transition: all ${SPIN_TIMES.MEDIUM + "ms"} linear;
     }
 
     &.spinning-slow {
         top: 100%;
-        transition: all ${slowSpinTime + "ms"} linear;
+        transition: all ${SPIN_TIMES.SLOW + "ms"} linear;
         transform: translate(-50%, -50%);
 
         &.final {
@@ -43,8 +46,9 @@ const SpinOption = styled.span`
     }
 `;
 
-function SpinningList(props) {
+const SpinningList = function(props) {
 
+    //Set the items to iterate to. Name is simply the value of the item. isTarget is true for the item that should display when done spinning. Active is for the item currently spinning
     const initChildren = props.items.map((item, i) => {
         return {
             "name": item.name || item,
@@ -55,7 +59,6 @@ function SpinningList(props) {
     const [children, setChildren] = useState(initChildren);
 
     useEffect(() => {
-
         let prevIndex = 0, activeIndex = 0, prevChild, activeChild, spinCount = 0, keepSpinning = true, timeout = 100, spinTimeout;
         let spinInterval = function() {
             //Shallow clone current children state
@@ -69,15 +72,15 @@ function SpinningList(props) {
             if (spinCount < 6){
                 //Spin Fast
                 activeChild.class = "spinning-fast";
-                timeout = fastSpinTime;
+                timeout = SPIN_TIMES.FAST;
             } else if (spinCount < 9){
                 //Slow Down
                 activeChild.class = "spinning-med";
-                timeout = medSpinTime
+                timeout = SPIN_TIMES.MEDIUM
             } else {
                 //Coming to a stop
                 activeChild.class = "spinning-slow";
-                timeout = slowSpinTime;
+                timeout = SPIN_TIMES.SLOW;
                 //If this is the child we're supposed to stop at, stop the loop, otherwise, keep slow turning
                 if (activeChild.isTarget){
                     activeChild.class += " final";
@@ -98,7 +101,7 @@ function SpinningList(props) {
         //Start the first spin
         spinTimeout = setTimeout(spinInterval, timeout);
 
-        return function clearTimeout() {
+        return () => {
             //In case of component unmounting, cancel the timeout
             clearTimeout(spinTimeout);
         }

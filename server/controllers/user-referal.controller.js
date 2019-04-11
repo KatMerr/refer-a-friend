@@ -1,9 +1,9 @@
-const UserReferalModel = require('../models/user-referal');
+const UserReferal = require('../models/user-referal');
 
 exports.getReferalsForProduct = function (req, res){
     const productID = req.params.productID;
     if (productID){
-        UserReferalModel
+        UserReferal
         .find({product: productID})
         .exec((err, referals) => {
             if (err) return res.send(500).send(err);
@@ -15,7 +15,7 @@ exports.getReferalsForProduct = function (req, res){
 }
 
 exports.getAllReferals = function (req, res){
-    UserReferalModel
+    UserReferal
         .find()
         .exec((err, referals) => {
             if (err) return res.send(500).send(err);
@@ -30,14 +30,25 @@ exports.updateSingleReferal = function (req, res){
         product: productID,
         _id: referalID
     };
-    UserReferalModel
+    UserReferal
         .findOneAndUpdate(query, doc)
         .then((updatedDoc) => {
             res.json(updatedDoc);
         });
 }
 
-exports.postReferal = function(req, res){
-    const { } = req.body;
+exports.addReferal = function(req, res){
+    const { productID, name, referalAmount, referalIdentifier, preferred } = req.body;
     
+    const newReferal = new UserReferal();
+    newReferal.name = name;
+    newReferal.product = productID;
+    newReferal.referalAmount = referalAmount;
+    newReferal.referalIdentifier = referalIdentifier;
+    newReferal.preferred = preferred;
+
+    newReferal.save((err, addedReferal) => {
+        if (err) return res.status(500).send(err);
+        res.json(addedReferal);
+    });
 }

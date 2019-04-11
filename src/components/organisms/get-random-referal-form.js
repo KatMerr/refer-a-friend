@@ -1,101 +1,71 @@
-import React, { useState, useEffect}  from 'react'
-import SpinningList from '../spinning-list'
+import React, {useState, useEffect}  from 'react'
 import styled from 'styled-components'
-import { getAllProducts, updateReferal, getReferalsForProduct } from '../../utils/api'
-import InputWithProductlist from '../molecules/input-with-productlist'
+import { getAllApprovedProducts, updateReferal, getReferalsForProduct } from '../../utils/api'
+import InputWithProductlist from '../molecules/form/input-with-item-list'
+import GenericProductDisplay from '../molecules/generic-product-display'
+import CreditCardDisplay from '../molecules/credit-card-display'
+import ReferalDisplay from '../molecules/referal-display'
+import Button from '../atoms/button'
 //Need to close the dropdown menu when the fields is clicked out of. Currently brakes if hovered over the list then tabs away with current method
 
-
-
-
 const Form = styled.form`
-    border: 4px white solid;
-    border-radius: 20px;
-` 
+    width: 1000px;
+    margin: 0 auto;
+`;
 
-function RandomReferalForm() {
+const CenteredButton = styled(Button)`
+    display: block;
+    margin: 0 auto;
+`
+
+const RandomReferalForm = function(){
     
+    const [gotRandomReferal, setGotRandomReferal] = useState(false);
+    const [productInputValue, setProductInputValue] = useState("");
     const [referalProducts, setReferalProducts] = useState([]);
-    const [filteredProducts, setFilteredProducts] = useState([]);
-    const [productInput, setProductInput] = useState("");
     const [selectedProduct, setSelectedProduct] = useState();
     const [selectedReferal, setSelectedReferal] = useState({});
-    const [areNoReferals, setAreNoReferals] = useState(false);
-    const namesArray = ["Jim", "James", "Bobby", "Liquor", "Cat", "Lemony"];
-    const [randomNames, setRandomNames] = useState(namesArray);
     let isGettingReferal = false;
+    const PRODUCT_TYPES = {
+        CREDIT_CARD : "card",
+        GENERIC : "generic"
+    };
 
     useEffect(() => {
-        //Get a list of all possible products
-        getAllProducts()
-        .then((data) => {
-            let firstTen = data.slice(0, 10);
-            //Referal products works as a const for all products
-            setReferalProducts(data);
-            //Filtered products is based off user input
-            setFilteredProducts(firstTen);
+        //On Component Mount, get all Products
+        getAllApprovedProducts()
+        .then((products) => {
+            //Referal products works as a master list for all products, filting is done in the Input-with-item-list component
+            setReferalProducts(products);
         });
     }, []);
-
-    function clearProduct(e){
-        e.preventDefault();
-        setProductInput("");
-        setSelectedProduct(null);
-        setSelectedReferal({});
-        setFilteredProducts(referalProducts.slice(0, 10));
-    }
     
-    function handleProductInput(productName){
-        //Controlled Component Functionality
-        setProductInput(productName);
-        //Filtered Product List
-        const lowerCaseProductName = productName.toLowerCase();
-        setFilteredProducts(referalProducts.filter(prod => prod.name.toLowerCase().includes(lowerCaseProductName)).slice(0, 10))
-    }
-    
-    function handleProductClick(product){
-        //Set the input value
-        setProductInput(product.name);
+    function handleProductListClick(product){
         //Show selected product
         setSelectedProduct(product);
+        //Set Input Value
+        setProductInputValue(product.name);
+    }
+
+    function handleProductInputChange(input){
+        //Controlled Component Functionality
+        setProductInputValue(input);
     }
     
     function handleGetRandomReferal(e){
         e.preventDefault();
-        getRandomReferal(selectedProduct);
-    }
-    
-    function handleReferalClick(e){
-        //Prevent the normal redirect action
-        e.preventDefault();
-    
-        //Open a new window to the provided
-        var refWindow = window.open(selectedReferal.referal_URL, "_blank");
-        refWindow.focus();
-    
-        //Incriment the referal link 'clicked' value and post the updated doc
-        let updatededReferal = selectedReferal;
-        updatededReferal.meta.clicked = updatededReferal.meta.clicked + 1;
-        updateReferal(selectedProduct._id, updatededReferal)
-        .then((updatedReferal) => {
-            console.log(updatedReferal);
-        });
-    }
-    
-    function getRandomReferal(product){
         if (!isGettingReferal){
             //To prevent multiple clicks, set isGettingReferal to true
             isGettingReferal = true;
-            //Get all referals for a product
-            getReferalsForProduct(product._id)
+            //Fetch all the referals for a product
+            getReferalsForProduct(selectedProduct._id)
             .then((referals) => {
                 //If there are any referals, get one randomly
                 if (referals.length) {
-                    //Set the no referals flag to false
-                    setAreNoReferals(false);
+                    //Need to implement a priorty flag for referals who helped contribute to the product list
                     //Get the minimum for the amount of clicks a referal has received.
                     const minClickedNum = referals.map(ref => ref.meta.clicked)
-                                                  .reduce((min, clicked) => Math.min(min, clicked), Infinity);
+                                                    .reduce((min, clicked) => Math.min(min, clicked), Infinity);
                     //Filter out referals that are not at the minimum clicks
                     const refs = referals.filter((referal) => {
                         return referal.meta.clicked === minClickedNum;
@@ -103,54 +73,58 @@ function RandomReferalForm() {
                     //If there are referals, randomly select one
                     const randomReferalIndex = Math.floor(Math.random() * refs.length);
                     let randomReferal = refs[randomReferalIndex];
-                    setRandomNames([{name: randomReferal.name, isSelected: true}, ...namesArray]);
-    
-                    //Update the randomly selected referal's roll count, and submit that back to the DB
+                    //Update the randomly selected referal's rolled count, and submit that back to the DB
                     randomReferal.meta.rolled = randomReferal.meta.rolled + 1;
-                    updateReferal(product._id, randomReferal)
+                    updateReferal(selectedProduct._id, randomReferal)
                     .then((updatedReferal) => {
-                        //Set referal to updated roll referal
+                        //Set selected referal to updated referal
                         setSelectedReferal(updatedReferal);
-                        console.log(updatedReferal);
+                        //set got random referal after fetching and updating
+                        setGotRandomReferal(true);
                         //Referal updating is done, allow the user to click again 
                         isGettingReferal = false;
                     });
                 } else {
-                    //If there aren't any referal, set the no referals flag to true
-                    setAreNoReferals(true);
+                    //Even if there were no referals, set the GotRandomReferal flag
+                    setGotRandomReferal(true);
                 }
             });
         }
     }
 
+    //Reset Form
+    function handleReset(e){
+        e.preventDefault();
+        setSelectedProduct(null);
+        setSelectedReferal({});
+        setGotRandomReferal(false);
+    }
 
     return (
         <Form>
-            <InputWithProductlist 
-                value={productInput} 
-                onInputChange={(e) => handleProductInput(e.target.value)} 
-                placeholder="Search for a product here"
-                handleProductClick={handleProductClick}
-                products={filteredProducts} />
-            <button onClick={clearProduct} >Clear Product</button>
             {
-                (selectedProduct) ? <div>
-                    <div><img src={selectedProduct.image} alt="" /></div>
-                    <div><span>Annual Fee:</span><span>{selectedProduct.annualFee}</span></div>
-                    <div><span>Intro Bonus:</span><span>{selectedProduct.introBonus + " " + selectedProduct.rewardType}</span></div>
-                    <div><span>Card Name:</span><span>{selectedProduct.name}</span></div>
-                    <div><span>Issuer:</span><span>{selectedProduct.issuer}</span></div>
-                    <button onClick={handleGetRandomReferal}>Get Random Referal</button>
-                </div> : null
-            }
-            {
-                (Object.keys(selectedReferal).length) ? <div>
-                    <div>Thanks for helping out <SpinningList items={randomNames}></SpinningList>
+                (!gotRandomReferal) ?
+                    <div>
+                        <InputWithProductlist 
+                            handleItemClick={handleProductListClick}
+                            inputValue={productInputValue}
+                            listItems={referalProducts}
+                            id="ProductList"
+                            onChange={handleProductInputChange}
+                            placeholder="Search for a product here" />
+                        {
+                            
+                            (selectedProduct) ? 
+                                <div>
+                                    {(selectedProduct.tags.indexOf(PRODUCT_TYPES.CREDIT_CARD) > -1) ? <CreditCardDisplay product={selectedProduct} /> : <GenericProductDisplay product={selectedProduct} />}
+                                    <CenteredButton onClick={handleGetRandomReferal}>Get Random Referal</CenteredButton>
+                                </div>
+                                : null
+                        }
                     </div>
-                    <div><button onClick={handleReferalClick}>Click here to use the Referal!</button> <a href={selectedReferal.referal_URL}>{selectedReferal.referal_URL}</a></div>
-                    <div>Amount of times Rolled: {selectedReferal.meta.rolled}</div>
-                    <div>Amount of times clicked: {selectedReferal.meta.clicked}</div>
-                    </div> : null
+                : <div>
+                    <ReferalDisplay referal={selectedReferal} product={selectedProduct} />
+                </div>
             }
         </Form>
     )

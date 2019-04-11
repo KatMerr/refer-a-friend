@@ -1,49 +1,33 @@
 import React from 'react'
-import Title from '../atoms/title'
 import RandomReferalForm from '../organisms/get-random-referal-form'
 import styled from 'styled-components'
+import Logo from '../atoms/logo'
+import Paragraph from '../atoms/paragraph'
+import { Colors, Fonts } from '../../utils/style-globals'
 
-const AppContainer = styled.div`
-    background-color: green;
-    width: 100vw;
-    height: 100vh;
-    min-height: 100vh;
-    color: white;
-    font-family: serif;
-    overflow: hidden;
+const MainLogo = styled(Logo)`
+    display: block;
+    margin: 0 auto 20px auto;
 `;
 
-const AppContent = styled.div`
-    max-width: 1200px;
-    margin: 0 auto;
+const PageContainer = styled.div`
+    margin-top: 20vh;
 `;
 
-const HomePageContainer = styled.div`
-    width: 100%;
-    text-align: center;
-`;
+const StyledParagraph = styled(Paragraph)`
 
-const Paragraph = styled.p`
-    font-size: 1rem;
-    color: white;
-    font-weight: normal;
 `;
 
 
-function HomePage() {
+const HomePage = function() {
 
     return (
-        <AppContainer>
-            <AppContent>
-                <HomePageContainer>
-                    <Title heading="Refer-A-Friend" />
-                    <Paragraph>
-                        This site is used to help people fulfill their refer a friend bonus.
-                    </Paragraph>
-                    <RandomReferalForm></RandomReferalForm>
-                </HomePageContainer>
-            </AppContent>
-        </AppContainer>
+            <PageContainer>
+                <MainLogo variant="large" />
+                <StyledParagraph>Site DescriptionSite DescriptionSite DescriptionSite DescriptionSite DescriptionSite DescriptionSite DescriptionSite DescriptionSite DescriptionSite DescriptionSite DescriptionSite Description</StyledParagraph>
+                <RandomReferalForm></RandomReferalForm>
+            </PageContainer>
+                    
     );
 };
 

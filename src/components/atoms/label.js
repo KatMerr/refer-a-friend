@@ -1,14 +1,24 @@
 import React from 'react'
 import styled from 'styled-components'
+import PropTypes from 'prop-types'
 
 const Label = styled.label`
-
+    color: black;
+    display: inline-block;
+    text-decoration: underline;
+    margin-bottom: 10px;
 `
 
-function Label(props){
+const renderLabel = function(props){
+    const { required } = props;
     return (
-        <Label htmlFor={props.name}>{props.title}</Label>
+        <Label htmlFor={props.for}>{(required) ? "*" : null}{props.children}</Label>
     )
 }
 
-export default Label
+renderLabel.propTypes = {
+    for: PropTypes.string,
+    required: PropTypes.bool
+}
+
+export default renderLabel

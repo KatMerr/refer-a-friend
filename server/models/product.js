@@ -6,7 +6,11 @@ const productSchema = new Schema({
     name: {
         type: String,
         required: [true, "Referal option must have a name"],
-        unique: true,
+        trim: true
+    },
+    company: {
+        type: String,
+        required: false,
         trim: true
     },
     imageSrc: {
@@ -14,9 +18,28 @@ const productSchema = new Schema({
         required: false,
         default: "//basic-image-url"
     },
-    company: {
-        type: String,
-        required: false
+    cardDetails: {
+        required: false,
+        annualFee: {
+            type: String,
+            required: false
+        },
+        benefits: {
+            type: [String],
+            required: false
+        },
+        introBonus: {
+            type: String,
+            required: false
+        },
+        issuer: {
+            type: String,
+            required: false
+        },
+        rewardType: {
+            type: String,
+            required: false
+        }
     },
     tags: {
         type: [String],
@@ -24,25 +47,31 @@ const productSchema = new Schema({
         default: []
         //,enum: "Credit Card, online shopping, etc."
     },
-    referalPage: {
+    referalIdentifer: {
         type: String,
-        required: false,
-        match: urlRegex
+        required: false
+        //Enum: "Url or Code"
     },
     usesCode: {
         type: Boolean,
         default: false
     },
+    pending: {
+        type: Boolean,
+        default: true
+    },
     approved_by: {
         type: String,
         required: false,
-        default: "1"
+        default: "0"
     },
     meta: {
-        imtesPicked: Number
+        timesPicked: Number
     }
 },{
     collection: 'Products'
 });
+
+productSchema.index({ name: 1, company: 1 }, { unique: true});
 
 module.exports = mongoose.model('Products', productSchema);

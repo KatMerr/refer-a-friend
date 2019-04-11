@@ -6,7 +6,8 @@ const router = new Router();
 
 
 router.route('/')
-    .get(userReferalController.getAllReferals);
+    .get(userReferalController.getAllReferals)
+    .post(userReferalController.addReferal);
 
 router.route('/:productID')
     .get(userReferalController.getReferalsForProduct);
