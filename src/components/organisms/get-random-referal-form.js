@@ -1,27 +1,23 @@
 import React, {useState, useEffect}  from 'react'
 import styled from 'styled-components'
-import { getAllApprovedProducts, updateReferal, getReferalsForProduct } from '../../utils/api'
-import InputWithProductlist from '../molecules/form/input-with-item-list'
+import { getAllApprovedProducts, updateReferal, getReferalsForProduct } from '../../utils/api-calls'
+import InputWithItemlist from '../molecules/form/input-with-item-list'
 import GenericProductDisplay from '../molecules/generic-product-display'
 import CreditCardDisplay from '../molecules/credit-card-display'
 import ReferalDisplay from '../molecules/referal-display'
 import Button from '../atoms/button'
+import Form from '../atoms/form'
 //Need to close the dropdown menu when the fields is clicked out of. Currently brakes if hovered over the list then tabs away with current method
-
-const Form = styled.form`
-    width: 1000px;
-    margin: 0 auto;
-`;
 
 const CenteredButton = styled(Button)`
     display: block;
     margin: 0 auto;
-`
+`;
 
 const RandomReferalForm = function(){
     
     const [gotRandomReferal, setGotRandomReferal] = useState(false);
-    const [productInputValue, setProductInputValue] = useState("");
+    const [productValue, setProductValue] = useState("");
     const [referalProducts, setReferalProducts] = useState([]);
     const [selectedProduct, setSelectedProduct] = useState();
     const [selectedReferal, setSelectedReferal] = useState({});
@@ -44,12 +40,12 @@ const RandomReferalForm = function(){
         //Show selected product
         setSelectedProduct(product);
         //Set Input Value
-        setProductInputValue(product.name);
+        setProductValue(product.name);
     }
 
     function handleProductInputChange(input){
         //Controlled Component Functionality
-        setProductInputValue(input);
+        setProductValue(input);
     }
     
     function handleGetRandomReferal(e){
@@ -92,41 +88,39 @@ const RandomReferalForm = function(){
         }
     }
 
-    //Reset Form
-    function handleReset(e){
-        e.preventDefault();
-        setSelectedProduct(null);
-        setSelectedReferal({});
+    function resetForm(){
         setGotRandomReferal(false);
+        setProductValue("");
+        setSelectedProduct();
+        setSelectedReferal({});
     }
 
     return (
-        <Form>
+            <>
             {
                 (!gotRandomReferal) ?
-                    <div>
-                        <InputWithProductlist 
-                            handleItemClick={handleProductListClick}
-                            inputValue={productInputValue}
-                            listItems={referalProducts}
-                            id="ProductList"
-                            onChange={handleProductInputChange}
-                            placeholder="Search for a product here" />
+                    <>
+                        <Form>
+                            <InputWithItemlist 
+                                handleItemClick={handleProductListClick} value={productValue}
+                                listItems={referalProducts} id="ProductList"
+                                noItemsRedirectRoute="/add-product" noItemsText="Not seeing what you're looking for? Click Here."
+                                onChange={handleProductInputChange} placeholder="Search for a Product!">
+                            </InputWithItemlist>
+                        </Form>
                         {
                             
                             (selectedProduct) ? 
-                                <div>
+                                <>
                                     {(selectedProduct.tags.indexOf(PRODUCT_TYPES.CREDIT_CARD) > -1) ? <CreditCardDisplay product={selectedProduct} /> : <GenericProductDisplay product={selectedProduct} />}
                                     <CenteredButton onClick={handleGetRandomReferal}>Get Random Referal</CenteredButton>
-                                </div>
+                                </>
                                 : null
                         }
-                    </div>
-                : <div>
-                    <ReferalDisplay referal={selectedReferal} product={selectedProduct} />
-                </div>
+                    </>
+                :   <ReferalDisplay resetForm={resetForm} getNewReferal={handleGetRandomReferal} referal={selectedReferal} product={selectedProduct} />
             }
-        </Form>
+            </>
     )
 }
 

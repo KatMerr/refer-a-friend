@@ -1,6 +1,5 @@
 import React from 'react'
 import styled from 'styled-components'
-import PropTypes from 'prop-types'
 import { Fonts } from '../../utils/style-globals'
 
 const Paragraph = styled.p`

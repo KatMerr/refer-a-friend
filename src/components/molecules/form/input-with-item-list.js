@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import Input from '../../atoms/input'
+import Input from '../../atoms/text-input'
 import ItemList from '../../atoms/item-list'
 import Label from '../../atoms/label'
 import FieldWrapper from '../../atoms/field-wrapper'
@@ -8,7 +8,8 @@ import PropTypes from 'prop-types'
 
 const renderInputWithDataList = function(props){
 
-    const { handleItemClick, id, includeLabel, inputValue, labelValue, listItems, name, placeholder, onChange, required, toolTip } = props;
+    const { handleItemClick, id, includeLabel, label, listItems, name, noItemsRedirectRoute,
+            noItemsText, placeholder, onChange, required, toolTip, value } = props;
 
     const [fileteredItems, setFilteredItems] = useState(listItems.slice(0, 10));
     const [isListHoveredOver, setIsListHoveredOver] = useState(false);
@@ -39,7 +40,7 @@ const renderInputWithDataList = function(props){
 
     //Item List should appear on input's focus only if there are 3 or more characters in the query
     function handleOnFocus(){
-        if(inputValue !== undefined && inputValue.length > 2){
+        if(value !== undefined && value.length > 2){
             setShowDataList(true);
         } else {
             setShowDataList(false);
@@ -83,7 +84,7 @@ const renderInputWithDataList = function(props){
         <FieldWrapper>
             { (includeLabel) ? 
                 <Label for={id} required={required}>
-                    { labelValue }
+                    { label }
                     { (toolTip) ? <ToolTip>{ toolTip }</ToolTip> : null }
                 </Label> 
                 : null 
@@ -96,7 +97,7 @@ const renderInputWithDataList = function(props){
                 onBlur={() => setShowDataList(isListHoveredOver)}
                 onKeyDown={handleBeforeInput}
                 placeholder={placeholder}
-                value={inputValue}
+                value={value}
                 variant={(showDataList) ? "rounded" : null}
                 type="text" />
             <ItemList
@@ -104,9 +105,11 @@ const renderInputWithDataList = function(props){
                 handleMouseEnter={() => setIsListHoveredOver(true)}
                 handleMouseLeave={() => setIsListHoveredOver(false)}
                 handleItemClick={(itemClicked) => onItemClick(itemClicked)}
+                noItemsRedirectRoute={noItemsRedirectRoute}
+                noItemsText={noItemsText}
                 scrollIndex={scrollIndex}
                 showList={showDataList}
-                variant="rounded" />
+                variant="rounded">{props.children}</ItemList>
         </FieldWrapper>
     )
 };
@@ -121,10 +124,12 @@ renderInputWithDataList.propTypes = {
     handleItemClick: PropTypes.func.isRequired,
     id: PropTypes.string.isRequired,
     includeLabel: PropTypes.bool,
-    inputValue: PropTypes.string.isRequired,
-    labelValue: PropTypes.string,
+    value: PropTypes.string.isRequired,
+    label: PropTypes.string,
     listItems: PropTypes.array.isRequired,
     name: PropTypes.string,
+    noItemsRedirectRoute: PropTypes.string,
+    noItemsText: PropTypes.string,
     placeholder: PropTypes.string,
     required: PropTypes.bool,
     toolTip: PropTypes.string

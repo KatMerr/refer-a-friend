@@ -4,13 +4,15 @@ const ProductController = require('../controllers/product.controller');
 const router = new Router();
 
 router.route("/")
-.get(ProductController.allProducts)
+.get(ProductController.getAllProducts)
 .post(ProductController.addProduct);
 
-router.route("/:productName")
-.get(ProductController.oneProduct);
+router.route("/:productID")
+.get(ProductController.getProductByID)
+//ADD DELETE FUNCTION
+.delete();
 
 router.route("/:productName/:companyName")
-.get(ProductController.oneProduct);
+.get(ProductController.getProductByName);
 
 module.exports = router;

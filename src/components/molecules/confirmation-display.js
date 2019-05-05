@@ -14,17 +14,15 @@ const renderConfirmationDisplay = function(props){
         <ConfirmationDisplay>
             <Title>{message}</Title>
             { (explanation) ? <Paragraph>{explanation}</Paragraph> : null }
+            { props.children }
         </ConfirmationDisplay>
     );
 };
 
 renderConfirmationDisplay.defaultProps = {
-    message: "Thank you!"
 };
 
 renderConfirmationDisplay.propTypes = {
-    message: PropTypes.string.isRequired,
-    explanation: PropTypes.string
 };
 
 export default renderConfirmationDisplay;

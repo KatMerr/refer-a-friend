@@ -1,21 +1,20 @@
 import React, { useState } from 'react'
-import styled from 'styled-components'
-import { addProduct, addReferal, getOneProduct } from '../../utils/api'
+import { Redirect } from 'react-router-dom'
+import { addProduct, addReferal, getOneProductByName, addImage } from '../../utils/api-calls'
+import Form from '../atoms/form'
+import Error from '../atoms/error'
+import H2 from '../atoms/h2'
+import P from '../atoms/paragraph'
 import InputWithLabel from '../molecules/form/input-with-label'
+import DropdownWithLabel from '../molecules/form/dropdown-with-label'
 import MultiSelectButtons from '../molecules/form/multi-select-buttons'
 import RadioButtons from '../molecules/form/radio-buttons'
 import SubmitButton from '../molecules/form/submit-button'
 import CheckBox from '../molecules/form/checkbox-with-label'
-import ConfirmationDisplay from '../molecules/confirmation-display'
+import ImagesUpload from '../molecules/form/upload-images'
 import FormTitle from '../molecules/form/form-title'
-
-const ProductForm = styled.form`
-
-`;
-
-const ErroMessage = styled.div`
-    color: red;
-`;
+import { isBadWord, enumToArray } from '../../utils/helpers'
+import { ProductTypes, ReferalTypes, RewardTypes, Issuers } from '../../utils/consts'
 
 const renderProductForm = function(props){
     
@@ -26,46 +25,51 @@ const renderProductForm = function(props){
     const [companyName, setCompanyName] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
     const [includeReferal, setIncludeReferal] = useState(false);
+    const [isProductAdded, setIsProductAdded] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [name, setName] = useState("");
+    const [productID, setProductID] = useState("");
+    const [referalID, setReferalID] = useState("");
+    const [productImage, setProductImage] =  useState("");
     const [productName, setProductName] = useState("");
     const [productTags, setProductTags] = useState([]);
+    const [referalAmount, setReferalAmount] = useState("");
     const [referalIdentifierType, setReferalIdentifierType] = useState("");
     const [referalIdentifier, setReferalIdentifier] = useState("");
-    const [isProductAdded, setIsProductAdded] = useState(false);
-    
 
+    //Functionality for Product Image
+    const handleProductImageChange = (files) => setProductImage(files[0]);
+    //Functionality for Include Referal Checkbox
+    const handleIncludeReferalClick = () => {
+        //Reset Referal Name
+        setName("");
+        //Toggle button
+        setIncludeReferal(!includeReferal);
+    }
 
     //Checks form validity asynchronously to allow for quick database lookups if needed
     function checkFormValidity(){
         return new Promise((resolve, reject) => {
             //Check to see an input product name
-            if (!productName){
-                reject("Please input a Product Name")
-            }
+            if (!productName) reject("Please input a Product Name");
             //Check to see an input company name
-            if (!companyName) {
-                reject("Please input a Company Name");
-            }
+            if (!companyName) reject("Please input a Company Name");
+
             //Tags can be empty as of right now
 
             //Check for the referal type and either the Referal Number or Referal Url
             if (!referalIdentifierType){
-                reject("Please indicate a referal type");
+                reject("Please indicate a referal type, either a URL or Referal Code");
             } else {
                 if (!referalIdentifier) {
                     reject ("Please input an example Referal URL or Code")
                 }
-                else {
-                    if (referalIdentifierType === "url"){
-                        //reject("Please input an example referal URL");
-                    }
-                    else if (referalIdentifierType === "code"){
-                        //reject("Please input an example referal code");
-                    }
-                }
             }
+            //Check if there is a name input and if that name is a bad word
+            if (name && isBadWord(name)) reject("Come on Man");
+            
             //Check if that product and company combination already exists, if not, return true
-            getOneProduct(productName, companyName)
+            getOneProductByName(productName, companyName)
             .then((product) => {
                 if (product){
                     reject(`The Product: ${productName} for company: ${companyName} already exists.`);
@@ -75,67 +79,23 @@ const renderProductForm = function(props){
             });
         });
     }
-
-    //Controlled Component Functionality for Annual Fee
-    function handleAnnualFeeChange(value){
-        setCardAnnualFee(value);
-    }
-    //Functionality for Intro Bonus
-    function handleIntroBonusChange(value){
-        setCardIntroBonus(value);
-    }
-    //Functionality for card Issuer
-    function handleIssuerChange(value){
-        setCardIssuer(value);
-    }
-    //Functionality for reward type
-    function handleRewardTypeChange(value){
-        setCardRewardType(value);
-    }
-    //Functionality for Product Input
-    function handleProductNameChange(value){
-        setProductName(value);
-    }
-    //Functionality for Product Input
-    function handleCompanytNameChange(value){
-        setCompanyName(value);
-    }
-
-    //functionality for Name Input
-    function handleNameChange(value){
-        setName(value);
-    }
-    //Functionality for URL or CODE buttons
-    function handleReferalIdentifierClick(value){
-        setReferalIdentifierType(value);
-    }
-    //Functionality for Include Referal Checkbox
-    function handleIncludeReferalClick(){
-        //Reset Referal Name
-        setName("")
-        //Toggle button
-        setIncludeReferal(!includeReferal);
-    }
-    //Functionality for multiselect checkboxes
-    function handleProductTagClick(tag){
-        let tagsClone = productTags.splice(0);
-        const tagsIndex = tagsClone.indexOf(tag);
-        if (tagsIndex >= 0) tagsClone = tagsClone.splice(tagsIndex + 1, 1);
-        else tagsClone.push(tag);
-        setProductTags(tagsClone);
-    }
-    //Functionality for Referal Number input
-    function handleReferalIdentifierChange(value){
-        setReferalIdentifier(value);
-    }
     
     function handleSubmit(e){
         e.preventDefault();
+        setIsSubmitting(true);
         checkFormValidity()
-        .then(() => {
+        .then(async () => {
+            let imageURL = "";
+            let publicID = "";
             //Form is valid, submit
-            //Find out which type of referal it is
-            const usesCode = (referalIdentifierType === "code") ? true : false;
+            //If there is an image, post the image first, get the url of the image on the response to be used for the Products database
+            if (productImage){
+                await addImage(productImage)
+                      .then((image) => {
+                        imageURL = image.url;
+                        publicID = image.public_id;
+                      });
+            }
             //Product object to be added
             const product = {
                 name: productName,
@@ -143,32 +103,40 @@ const renderProductForm = function(props){
                 tags: productTags,
                 referalIdentifier: referalIdentifier,
                 usesCode: (referalIdentifierType === "code") ? true : false,
-                //image: image
-                cardDetails: (productTags.includes("card") ? {
-                    annualFee: "$" + cardAnnualFee,
+                image: {
+                    imageURL: imageURL,
+                    publicID: publicID
+                },
+                cardDetails: (productTags.includes(ProductTypes.Credit_Card)) ? {
+                    annualFee: cardAnnualFee,
                     introBonus: cardIntroBonus,
+                    //Issuer and reward Type may be having problems, need to check
                     issuer: cardIssuer,
                     rewardType: cardRewardType
-                } : {})
+                } : {},
+                pending: true
             };
 
             //Add Product
             addProduct(product)
             .then((newProduct) => {
-                console.log(newProduct);
+                //Set the product ID to be used in the redirect to the confirmation screen
+                setProductID(newProduct._id);
                 //If they are looking to add a referal for this product, do that as well with the preferred flag set
                 if (includeReferal){
                     //Referal object to be added
                     const referal = {
                         productID: newProduct._id,
                         name: name || "Someone...",
+                        referalAmount: referalAmount,
                         referalIdentifier: referalIdentifier,
                         preferred: true
                     };
-                    //Add the feral
+                    //Add the referal
                     addReferal(referal)
                     .then((newReferal) => {
-                        console.log(newReferal);
+                        //Set the referalID to be used in the redirect to the confirmation screen
+                        setReferalID(newReferal._id);
                         setIsProductAdded(true);
                     });
                 } else {
@@ -176,129 +144,96 @@ const renderProductForm = function(props){
                 }
             });
         })
-        .catch((err) => {
-            //Form is invalid, set error message
-            setErrorMessage(err);
-        });
+        .catch((err) => setErrorMessage(err))
+        .finally(() => setIsSubmitting(false));
     }
 
-
     return (
-        <div>
-            <FormTitle>Add a Products</FormTitle>
-            {
-                (!isProductAdded) ? <ProductForm>
+            (!isProductAdded) ? 
+            <>
+                <Form>
+                    <FormTitle>Add a Product</FormTitle>
+                    <P>In exchange for entering a product we don't have yet, we will make you the first referal used for that product (if we use your submission, of course).</P>
                     <InputWithLabel
-                        inputValue={companyName}
-                        labelValue="Company Name"
-                        id="CompanyName"
-                        onChange={handleCompanytNameChange}
-                        required={true}
-                        type="text"/>
+                        value={companyName} label="Company Name"
+                        id="CompanyName" onChange={setCompanyName}
+                        required={true}  type="text"/>
                     <InputWithLabel
-                        inputValue={productName}
-                        labelValue="Product Name"
-                        id="ProductName"
-                        onChange={handleProductNameChange}
-                        required={true}
-                        type="text"/>
+                        value={productName} label="Product Name"
+                        id="ProductName" onChange={setProductName}
+                        required={true} type="text"/>
+                    <ImagesUpload
+                        accept={[".png", ".gif", ".jpg"]}  id="ProductImage"
+                        label="Product Image" maxSize={.5} onChange={handleProductImageChange}
+                        toolTip="Image for product. It will help out a bunch"
+                        usePreview={true} />
                     <RadioButtons
-                        buttons={[{
-                            name: "URL",
-                            value: "url"
-                        }, {
-                            name: "Code",
-                            value: "code"
-                        }]}
-                        labelValue="Referal Type"
-                        onButtonClick={handleReferalIdentifierClick}
-                        required={true} />
+                        buttons={enumToArray(ReferalTypes)}  label="Referal Type"
+                        onButtonClick={setReferalIdentifierType} required={true}
+                        value={referalIdentifierType} />
                     <InputWithLabel
-                        disabled={(referalIdentifierType) ? false : true}
-                        onChange={handleReferalIdentifierChange}
-                        id="referalIdentifier"
-                        inputValue={referalIdentifier}
-                        labelValue="Example Referal Number for this product"
-                        required={true}
-                        type="text" />
+                        disabled={(referalIdentifierType) ? false : true}  onChange={setReferalIdentifier}
+                        id="referalIdentifier" value={referalIdentifier}
+                        label={`Example referal ${referalIdentifierType || "information"} for this product`}
+                        required={true} type="text" />
                     <MultiSelectButtons
-                        buttons={[{
-                            name: "Credit Card",
-                            value: "card"
-                        },{
-                            name: "Online Service",
-                            value: "service"
-                        }]}
-                        labelValue="Select All Tags that Apply"
-                        onButtonClick={handleProductTagClick}
-                        required={true}
+                        buttons={enumToArray(ProductTypes)}  label="Select All Tags that Apply"
+                        onButtonClick={setProductTags} required={true} value={productTags}
                         />
                     {
                         (productTags.includes("card")) ?
-                            <div>
+                            <>
+                                <H2>Basic Credit Card Information</H2>
+                                <P>Any additional information you could provide here would be extremely helpful</P>
                                 <InputWithLabel
-                                    onChange={handleAnnualFeeChange}
-                                    id="annualFee"
-                                    inputValue={cardAnnualFee}
-                                    labelValue="Annual Fee for card"
-                                    placeholder=""
-                                    required={true}
-                                    type="number" />
+                                    onChange={setCardAnnualFee} id="annualFee"
+                                    value={cardAnnualFee} label="Annual Fee for card"
+                                    toolTip="In dollars, please." type="number" />
                                 <InputWithLabel
-                                    onChange={handleIntroBonusChange}
-                                    id="introBonus"
-                                    inputValue={cardIntroBonus}
-                                    labelValue="Intro Bonus for Card"
-                                    placeholder=""
-                                    required={true}
-                                    type="number" />
-                                <InputWithLabel
-                                    onChange={handleRewardTypeChange}
-                                    id="rewardsType"
-                                    inputValue={cardRewardType}
-                                    labelValue="THIS SHOULD BE A DROPDOWN Rewards Types (i.e. Points, Cash Back, Miles)"
-                                    placeholder=""
-                                    required={true}
+                                    onChange={setCardIntroBonus} id="introBonus"
+                                    value={cardIntroBonus} label="Intro Bonus for Card"
+                                    toolTip="If any fees are waived, indicate so here. EX: 50,000 points, Intro Fee waived first year."
                                     type="text" />
-                                <InputWithLabel
-                                    onChange={handleIssuerChange}
-                                    id="cardIssuer"
-                                    inputValue={cardIssuer}
-                                    labelValue="THIS SHOULD BE A DROPDOWN Card Issuer (i.e. Mastercard, Visa, Discover, Amex)"
-                                    placeholder=""
-                                    required={true}
-                                    type="text" />
-                            </div>
+                                <DropdownWithLabel
+                                    onChange={setCardRewardType} id="rewardsType"
+                                    label="Rewards Type:" options={enumToArray(RewardTypes)}
+                                    toolTip="Usually referals come in 3 types, points, miles, or cash back."
+                                    value={cardRewardType}/>
+                                <DropdownWithLabel
+                                    onChange={setCardIssuer} id="cardIssuer"
+                                    label="Card Issuer:" options={enumToArray(Issuers)}
+                                    type="text" value={cardIssuer} />
+                            </>
                             : null
                     }
-                    <CheckBox
-                        id="Include Referal"
-                        isChecked={includeReferal}
-                        labelValue="Include a referal"
+                    <CheckBox id="Include Referal"
+                        isChecked={includeReferal} label="Include a referal"
                         onChange={handleIncludeReferalClick}
                     ></CheckBox>
                     {
                         (includeReferal) ?
-                        <InputWithLabel
-                            id="Name"
-                            inputValue={name}
-                            labelValue="Name"
-                            placeholder="Your Name. Could be anything!"
-                            onChange={handleNameChange}
-                            toolTip="Name is only used as astetic. We have no desire to collect your information. Put anything you want (as long as its appropriate)."
-                            type="text" />
+                        <>
+                            <InputWithLabel
+                                id="Name" value={name}
+                                label="Name" placeholder="Your Name. Could be anything!"
+                                onChange={setName}
+                                toolTip="Name is only used as astetic. We have no desire to collect your information. Put anything you want (as long as its appropriate)."
+                                type="text" />
+                            <InputWithLabel
+                                id="ReferalAmount" value={referalAmount}
+                                label="Referal Amount" onChange={setReferalAmount}
+                                toolTip="Benefit you'll receive if your referal is used."
+                                type="number" />
+                        </>
                         : null
                     }
                     {
-                        (errorMessage) ? <ErroMessage>{errorMessage}</ErroMessage> : null
+                        (errorMessage) ? <Error>{errorMessage}</Error> : null
                     }
-                    <SubmitButton onClick={handleSubmit}>Submit</SubmitButton>
-                </ProductForm>
-                : <ConfirmationDisplay
-                    message="Thanks!"
-                    explanation="Your referal is boosted" />
-            }
-        </div>
+                    <SubmitButton onClick={handleSubmit} isSubmitting={isSubmitting}>Submit</SubmitButton>
+                </Form>
+            </>
+            : <Redirect push to={{ pathname: "/add-product-confirmation", search:`?productID=${productID}${(referalID) ? `&referalID=${referalID}` : null}`}} />
         
     )
 }

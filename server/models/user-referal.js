@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const urlRegex = require('../constants').urlRegex;
 
 const userReferalSchema = Schema({
     name: {
@@ -13,7 +12,7 @@ const userReferalSchema = Schema({
         required: [true, "Must have reference to Product that the referal works with"]
     },
     referalAmount: {
-        type: Number,
+        type: String,
         required: false
     },
     referalIdentifier: {
@@ -22,7 +21,12 @@ const userReferalSchema = Schema({
     },
     preferred: {
         type: Boolean,
-        required: true,
+        required: false,
+        default: false
+    },
+    underReview: {
+        type: Boolean,
+        required: false,
         default: false
     },
     meta: {

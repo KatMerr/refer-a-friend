@@ -25,8 +25,11 @@ const Input = styled.input`
     ${props => props.disabled && css`
         background-color: ${Colors.lightGray};
     `}
-    
-    
+    ${props => props.error && css`
+        -webkit-box-shadow: 0px 0px 10px 0px ${Colors.red};
+        -moz-box-shadow: 0px 0px 10px 0px ${Colors.red};
+        box-shadow: 0px 0px 10px 0px ${Colors.red};
+    `}
     &:focus {
         -webkit-box-shadow: 0px 0px 10px 0px ${Colors.green};
         -moz-box-shadow: 0px 0px 10px 0px ${Colors.green};
@@ -35,15 +38,19 @@ const Input = styled.input`
 `;
 
 const renderInput = function(props){
-    const { autoFocus, className, disabled, id, name, maxLength, onBeforeInput, onBlur, onChange, onFocus, onKeyDown, placeholder, type, value, variant} = props;
+    const { autoFocus, className, disabled, error, id, name, maxLength, max, min,
+            onBeforeInput, onBlur, onChange, onFocus, onKeyDown, placeholder, type, value, variant} = props;
     
     return (
         <Input
             autoFocus={autoFocus}
             className={className}
             disabled={disabled}
+            error={error}
             id={id}
             maxLength={maxLength}
+            max={max}
+            min={min}
             name={name}
             onBlur={onBlur}
             onChange={onChange}
@@ -59,12 +66,14 @@ const renderInput = function(props){
 
 Input.defaultProps = {
     autoFocus: false,
-    disabled: false
+    disabled: false,
+    error: false
 };
 
 Input.propTypes = {
     autoFocus: PropTypes.bool,
     disabled: PropTypes.bool,
+    error: PropTypes.bool,
     id: PropTypes.string.isRequired,
     maxLength: PropTypes.number,
     name: PropTypes.string,

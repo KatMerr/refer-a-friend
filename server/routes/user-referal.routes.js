@@ -9,12 +9,12 @@ router.route('/')
     .get(userReferalController.getAllReferals)
     .post(userReferalController.addReferal);
 
-router.route('/:productID')
-    .get(userReferalController.getReferalsForProduct);
-
-router.route('/:productID/:referalID')
-    .get()
+router.route('/:referalID')
+    .get(userReferalController.getSingleReferal)
     .post(userReferalController.updateSingleReferal);
+
+router.route('/product/:productID')
+    .get(userReferalController.getReferalsForProduct);
 
 
 module.exports = router;

@@ -1,16 +1,18 @@
 import React from 'react'
 import styled from 'styled-components'
-import { Colors } from '../../utils/style-globals'
+import { Fonts, Colors } from '../../utils/style-globals'
 
 const ProductTitle = styled.div`
-    font-size: 2rem;
-    font-weight: 600;
+    color: ${Colors.black};
+    font-size: ${Fonts.sizes.large};
+    font-weight: ${Fonts.weights.bold};
     text-align: center;
 `;
 
 const renderProductTitle = function(props){
+    const { className } = props;
     return(
-        <ProductTitle>{props.children}</ProductTitle>
+        <ProductTitle className={className}>{props.children}</ProductTitle>
     );
 };
 

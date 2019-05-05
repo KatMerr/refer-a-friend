@@ -7,9 +7,9 @@ const Image = styled.img`
 `;
 
 const renderImage = function(props){
-    const { alt, height, src, width } = props;
+    const { alt, className, height, src, width } = props;
     return(
-        <Image src={src} alt={alt} height={height} width={width} />
+        <Image className={className} src={src} alt={alt} height={height} width={width} />
     );
 };
 

@@ -1,117 +1,92 @@
 import React, { useEffect, useState } from 'react'
-import styled from 'styled-components'
+import { useInterval } from '../../utils/helpers'
+import styled, { keyframes } from 'styled-components'
+import PropTypes from 'prop-types'
 
 //This needs more work
 //Not spinning again when user requests a new referal.
-
-//Spin times
-const SPIN_TIMES = {
-    FAST: 200,
-    MEDIUM: 300,
-    SLOW: 500
-};
 
 const SpinContainer = styled.div`
     position: relative;
     display: inline-block;
     min-height: 30px;
-    width: 100%;
+    min-width: 150px;
     overflow: hidden;
+    vertical-align: bottom;
+`;
+const Start = keyframes`
+    from { top: 0;}
+    to { top: 75px; }
 `;
 
-const SpinOption = styled.span`
-    position: absolute;
-    top: -100%;
-    left: 50%;
-    transform: translateX(-50%);
-    
-    &.spinning-fast {
-        top: 100%;
-        transition: all ${SPIN_TIMES.FAST + "ms"} linear;
-    }
-
-    &.spinning-med {
-        top: 100%;
-        transition: all ${SPIN_TIMES.MEDIUM + "ms"} linear;
-    }
-
-    &.spinning-slow {
-        top: 100%;
-        transition: all ${SPIN_TIMES.SLOW + "ms"} linear;
-        transform: translate(-50%, -50%);
-
-        &.final {
-            top: 50%;
-        }
-    }
+const Spin = keyframes`
+    from { top: -75px; }
+    to { top: 75px; }
+`;
+const Stop = keyframes`
+    from { top: -50px;}
+    to { top: 0;}
+`;
+const SpinningChild = styled.div`
+    display: inline-block;
+    position: relative;
+    animation: ${props => (props.isTarget) ? ((!props.isSpinning) ? Start : Stop) : Spin} ${props => props.duration}ms linear infinite;
+    animation-iteration-count: ${props => (props.isTarget) ? 1 : "infinite"};
 `;
 
 const SpinningList = function(props) {
+    const { delay, items } = props;
 
+    function initChildren(){
+        return items.map((item, i) => {
+            return {
+                "name": item.name || item,
+                "isTarget" : (i === items.length - 1) ? true : false
+            }});
+    }
     //Set the items to iterate to. Name is simply the value of the item. isTarget is true for the item that should display when done spinning. Active is for the item currently spinning
-    const initChildren = props.items.map((item, i) => {
-        return {
-            "name": item.name || item,
-            "isTarget" : item.isSelected || false,
-            "active": false
-        }
-    });
-    const [children, setChildren] = useState(initChildren);
+    const [children, setChildren] = useState();
+    const [activeChild, setActiveChild] = useState();
+    const [activeChildIndex, setActiveChildIndex] = useState(0);
+    const [rotationDelay, setrotationDelay] = useState(delay);
+    const [isSpinning, setIsSpinning] = useState(true);
 
     useEffect(() => {
-        let prevIndex = 0, activeIndex = 0, prevChild, activeChild, spinCount = 0, keepSpinning = true, timeout = 100, spinTimeout;
-        let spinInterval = function() {
-            //Shallow clone current children state
-            let prevChildren = children.slice(0);
-            //Get previous child and active child
-            prevChild = prevChildren[prevIndex];
-            activeChild = prevChildren[activeIndex];
-            //Reset the prev child
-            prevChild.class = "";
-            //Set the spin class on the active child
-            if (spinCount < 6){
-                //Spin Fast
-                activeChild.class = "spinning-fast";
-                timeout = SPIN_TIMES.FAST;
-            } else if (spinCount < 9){
-                //Slow Down
-                activeChild.class = "spinning-med";
-                timeout = SPIN_TIMES.MEDIUM
-            } else {
-                //Coming to a stop
-                activeChild.class = "spinning-slow";
-                timeout = SPIN_TIMES.SLOW;
-                //If this is the child we're supposed to stop at, stop the loop, otherwise, keep slow turning
-                if (activeChild.isTarget){
-                    activeChild.class += " final";
-                    keepSpinning = false;
-                }
-            }
-            //Set the state to rerender the children
-            setChildren(prevChildren);
-            //Adjust indexes and increment spin count
-            prevIndex = activeIndex;
-            activeIndex = (prevChildren.length - 1 === activeIndex) ? 0 : activeIndex+1;
-            spinCount++;
-            //Set another timeout if the keep spinning flag is set.
-            if (keepSpinning){
-                spinTimeout = setTimeout(spinInterval, timeout);
-            } 
-        };
-        //Start the first spin
-        spinTimeout = setTimeout(spinInterval, timeout);
+        setChildren(initChildren());
+        setrotationDelay(delay);
+    }, [items])
 
-        return () => {
-            //In case of component unmounting, cancel the timeout
-            clearTimeout(spinTimeout);
+    useInterval(() => {
+        if (children){
+            if (activeChildIndex === children.length - 1){
+                setrotationDelay(null);
+                setIsSpinning(false);
+                setActiveChildIndex(0);
+            } else {
+                setIsSpinning(true);
+                let activeIndex = (activeChildIndex === children.length - 1) ? 0 : activeChildIndex + 1;
+                setActiveChildIndex(activeIndex);
+                let child = children[activeIndex];
+                setActiveChild(child);
+                if (activeChildIndex > children.length - 6) setrotationDelay(delay*2);
+            }
         }
-    }, []);
+    }, rotationDelay);
 
     return (
         <SpinContainer>
-            {children.map((child, i) => <SpinOption key={i} className={child.class}>{child.name}</SpinOption>)}
+            {(activeChild) ? <SpinningChild isSpinning={isSpinning} isTarget={activeChild.isTarget} duration={rotationDelay}>{activeChild.name}</SpinningChild> : null }
         </SpinContainer>
     );
+}
+
+SpinningList.defaultProps = {
+    delay: 250
+}
+
+SpinningList.propTypes = {
+    delay: PropTypes.number.isRequired,
+    items: PropTypes.array.isRequired
 }
 
 export default SpinningList;

@@ -1,35 +1,20 @@
 import React from 'react'
-import styled, { css }  from 'styled-components'
+import styled from 'styled-components'
 import PropTypes from 'prop-types'
-import FullLogo from '../../images/logo.png'
-import ShortLogo from '../../images/logo.png'
+import LongLogo from '../../images/logo.png'
+import ShortLogo from '../../images/shortened-logo.png'
 
 const Logo = styled.img`
-
-    ${props => props.variant === "tiny" && css`
-        width: 60px;
-    `}
-    ${props => props.variant === "small" && css`
-        width: 120px;
-    `}
-    ${props => props.variant === "medium" && css`
-        width: 300px;
-    `}
-    ${props => props.variant === "large" && css`
-        width: 500px;
-    `}
-    ${props => props.variant === "full" && css`
-        width: auto;
-    `}
+    width: 100%;
 `;
 
 const renderLogo = function(props){
     const { className, variant } = props;
     let src = "";
-    if (variant === "tiny" || variant === "small"){
+    if (variant === "short"){
         src = ShortLogo;
     } else {
-        src = FullLogo;
+        src = LongLogo;
     }
     return(
         <Logo className={className} variant={ variant } src={ src }></Logo>
@@ -37,11 +22,11 @@ const renderLogo = function(props){
 };
 
 renderLogo.defaultProps = {
-    variant: "full"
+    variant: "long"
 };
 
 renderLogo.propTypes = {
-    variant: PropTypes.oneOf(["tiny", "small", "medium", "large", "full"])
+    variant: PropTypes.oneOf(["short","long"])
 };
 
 export default renderLogo;

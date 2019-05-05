@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const urlRegex = require('../constants').urlRegex;
 
 const productSchema = new Schema({
     name: {
@@ -13,10 +12,15 @@ const productSchema = new Schema({
         required: false,
         trim: true
     },
-    imageSrc: {
-        type: String,
-        required: false,
-        default: "//basic-image-url"
+    image: {
+        imageURL: {
+            type: String,
+            required: false
+        },
+        publicID: {
+            type: String,
+            required: false
+        }
     },
     cardDetails: {
         required: false,
@@ -43,14 +47,11 @@ const productSchema = new Schema({
     },
     tags: {
         type: [String],
-        required: false,
-        default: []
-        //,enum: "Credit Card, online shopping, etc."
+        required: false
     },
-    referalIdentifer: {
+    referalIdentifier: {
         type: String,
         required: false
-        //Enum: "Url or Code"
     },
     usesCode: {
         type: Boolean,

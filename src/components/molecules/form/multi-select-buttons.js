@@ -1,44 +1,49 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import PropTypes from 'prop-types'
 import Button from '../../atoms/button'
+import ButtonRow from '../../atoms/button-row'
 import Label from '../../atoms/label'
 import FieldWrapper from '../../atoms/field-wrapper'
 import ToolTip from '../../atoms/tooltip'
 
-const ButtonsContainer = styled.div`
-    text-align: center;
-`;
-
 const renderMultiSelectButtons = function(props){
-    const { labelValue, onButtonClick, required, toolTip} = props;
+    const { buttons, label, onButtonClick, required, toolTip, value} = props;
+    const [ selectedButtons, setSelectedButtons] = useState();
 
-    const [ buttons, setButtons ] = useState(props.buttons);
+    //Controlled Component, so the value is stored on a parent and sent down throw props, so it needs to update each time that value updates
+    useEffect(() => setSelectedButtons(value), [value]);
 
     function handleButtonClick(selectedButton){
-        //Controlled Component Functionality
-        onButtonClick(selectedButton.value);
-        //Deselect All Other Buttons and Select
-        let buttonsClone = buttons.slice(0);
-        buttonsClone.map(button => {
-            if (button.name === selectedButton.name) button.active = !button.active;
-        });
-        setButtons(buttonsClone);
+        //Either Adding or Removing the value of the selected button
+        const index = (selectedButtons) ? selectedButtons.indexOf(selectedButton.value) : -1;
+        let newButtons = (selectedButtons) ? selectedButtons.slice() : [];
+        if (index > -1) {
+            newButtons.splice(index, 1);
+        } else {
+            newButtons.push(selectedButton.value);
+        }
+        //Call function of parent and return new array
+        onButtonClick(newButtons);
+    }
+    function isSelected(value){
+        //If there are any selected buttons and the button's value is one of them
+        return !!((selectedButtons) && selectedButtons.includes(value));
     }
     return(
         <FieldWrapper>
-            {(labelValue) ? 
+            {(label) ? 
                 <Label required={required}>
-                    { labelValue }
+                    { label }
                     { (toolTip) ? <ToolTip>{ toolTip }</ToolTip> : null }
                 </Label>
                 : null
             }
-            <ButtonsContainer>
+            <ButtonRow>
                 {
                     buttons.map((button, i) => 
                         <Button
-                            active={button.active}
+                            active={isSelected(button.value)}
                             disabled={button.disabled}
                             key={i}
                             name={button.name}
@@ -48,21 +53,23 @@ const renderMultiSelectButtons = function(props){
                             value={button.value}>{button.name}</Button>
                     )
                 }
-            </ButtonsContainer>
+            </ButtonRow>
         </FieldWrapper>
     );
 };
 
 renderMultiSelectButtons.defaultProps = {
-    required: false
+    required: false,
+    value: []
 };
 
 renderMultiSelectButtons.propTypes = {
     buttons: PropTypes.array.isRequired,
-    labelValue: PropTypes.string,
+    label: PropTypes.string,
     onButtonClick: PropTypes.func.isRequired,
     required: PropTypes.bool,
-    toolTip: PropTypes.string
+    toolTip: PropTypes.string,
+    value: PropTypes.array.isRequired
 };
 
 export default renderMultiSelectButtons;

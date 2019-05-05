@@ -1,4 +1,6 @@
 export const Colors = {
+    black: "#0A0A0A",
+
     darkGray: "#5A5A5A",
     gray: "#AAAAAA",
     lightGray: "#E7E7E7",
@@ -12,7 +14,7 @@ export const Colors = {
     darkRed: "#660D17",
     red: "#931322",
 
-    black: "#0A0A0A"
+    white: "#FFF",
 };
 
 export const Fonts = {
@@ -25,7 +27,19 @@ export const Fonts = {
 
         small: "1.2rem",
         normal: "1.6rem",
-        large: "2rem",
-        largest: "3rem"
+        large: "4rem",
+        largest: "7rem"
+    },
+    weights: {
+        light: 200,
+        normal: 400,
+        bold: 600,
+        veryBold: 800
     }
+};
+
+export const Breakpoints = {
+    max: "1000px",
+    tablet: "768px",
+    phone: "480px"
 };

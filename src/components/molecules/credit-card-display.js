@@ -7,46 +7,45 @@ import { DataPiece, ICON_VARIANTS } from '../atoms/data-piece'
 import ProductTitle from '../atoms/product-title'
 
 const CreditCardDisplay = styled.div`
-    margin: 30px auto;
+    margin: 20px auto;
+    display: grid;
+    grid-template-columns: 33% 67%;
+    grid-template-rows: 50px auto;
+    min-height: 200px;
 `;
 
-const ImageContainer = styled.div`
-    display: inline-block;
-    width: 33%;
+const StyledImage = styled(Image)`
+    grid-column: 1 / 1;
+    grid-row: 1 / span 2;
 `;
-
-const InformationContainer = styled.div`
-    display: inline-block;
-    width: 67%;
-    vertical-align: top;
-    padding: 0 0 20px 20px;
-    text-align: left;
-    box-sizing: border-box;
+const StyledTitle = styled(ProductTitle)`
+    grid-column: 2 / 2;
+    grid-row: 1 / 1;
+    align-self: center;
 `;
-
 const DataPieceRow = styled.div`
-    & > div{
-        width: 33%;
-    }
+    grid-column: 2 / 2;
+    grid-row: 2 / 2;
+    align-self: center;
+    display: grid;
+    grid-template-columns: 33% 33% 33%;
+    grid-template-rows: 100%;
 `;
+
 
 const renderCreditCardDisplay = function(props){
-    let { cardDetails, image, imageSrc, name } = props.product;
+    let { cardDetails, image, name } = props.product;
+    image = image.imageURL || GenericCardImage;
     let { annualFee, benefits, introBonus, issuer, rewardType } = cardDetails;
-    image = GenericCardImage;
     return (
         <CreditCardDisplay>
-            <ImageContainer>
-                <Image src={image} alt={"Image of " + name}></Image>
-            </ImageContainer>
-            <InformationContainer>
-                <ProductTitle>{name}</ProductTitle>
-                <DataPieceRow>
-                    <DataPiece data={annualFee} label={"Annual Fee"} variant={ICON_VARIANTS.MONEY} />
-                    <DataPiece data={introBonus} label={"Intro Bonus"} />
-                    <DataPiece data={issuer} label={"Card Issuer"} variant={ICON_VARIANTS.CREDIT_CARD} />
-                </DataPieceRow>
-            </InformationContainer>
+            <StyledImage src={image} alt={"Image of " + name}></StyledImage>
+            <StyledTitle>{name}</StyledTitle>
+            <DataPieceRow>
+                <DataPiece data={annualFee} label={"Annual Fee"} variant={ICON_VARIANTS.MONEY} />
+                <DataPiece data={introBonus} label={"Intro Bonus"} />
+                <DataPiece data={issuer} label={"Card Issuer"} variant={ICON_VARIANTS.CREDIT_CARD} />
+            </DataPieceRow>
         </CreditCardDisplay>
     );
 };

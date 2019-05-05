@@ -1,31 +1,25 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import PropTypes from 'prop-types'
 import Button from '../../atoms/button'
+import ButtonRow from '../../atoms/button-row'
 import FieldWrapper from '../../atoms/field-wrapper'
 
-const ButtonWrapper = styled.div`
-    width: 100%;
-    text-align: center;
-`;
-
 const renderSubmitButton = function(props){
-    const { onClick } = props;
+    const { onClick, isSubmitting } = props;
+
     return(
         <FieldWrapper>
-            <ButtonWrapper>
+            <ButtonRow>
                 <Button
                     onClick={onClick}
                     type="submit"
                     variant="primary"
                 >{props.children}</Button>
-            </ButtonWrapper>
+                { (isSubmitting) ? <div>Submitting...</div> : null}
+            </ButtonRow>
         </FieldWrapper>
     );
-};
-
-renderSubmitButton.defaultProps = {
-
 };
 
 renderSubmitButton.propTypes = {

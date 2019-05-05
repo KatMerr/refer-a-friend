@@ -6,16 +6,15 @@ import { Colors } from '../../utils/style-globals'
 const CheckBox = styled.input`
     color: ${Colors.lightGray};
     border: 2px solid ${Colors.lightGray};
-    padding: 10px;
+    padding: 13px;
     border-radius: 5px;
     cursor: pointer;
     -webkit-transition: background-color 100ms linear;
     transition: background-color 100ms linear;
     outline: none;
-    font-size: 18px;
     margin: 10px 5px;
     background-color: ${Colors.darkGreen};
-    vertical-align: bottom;
+    vertical-align: middle;
     -webkit-appearance: button;
 
     &:hover {

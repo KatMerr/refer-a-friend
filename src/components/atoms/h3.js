@@ -1,16 +1,18 @@
 import React from 'react'
 import styled from 'styled-components'
-import PropTypes from 'prop-types'
+import { Colors, Fonts } from '../../utils/style-globals'
 
 const H3 = styled.h3`
-    color: black;
-    font-size: 3rem;
-    font-family: cursive;
-`
+    color: ${Colors.black};
+    font-family: ${Fonts.types.brush};
+    font-size: ${Fonts.sizes.large};
+    text-align: center;
+`;
 
 const renderH3 = function(props){
+    const { className } = props;
     return (
-        <H3>{props.children}</H3>
+        <H3 className={className}>{props.children}</H3>
     )
 }
 

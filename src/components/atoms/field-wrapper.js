@@ -2,9 +2,8 @@ import React from 'react'
 import styled from 'styled-components'
 
 const FieldWrapper = styled.div`
-    max-width: 500px;
     position: relative;
-    margin: 10px auto;
+    margin: 20px auto;
 `;
 
 const renderFieldWrapper = function(props){

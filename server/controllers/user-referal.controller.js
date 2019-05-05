@@ -23,11 +23,22 @@ exports.getAllReferals = function (req, res){
         });
 }
 
+exports.getSingleReferal = function(req, res){
+    const { referalID } = req.params;
+    const query = {
+        _id: referalID
+    }
+    UserReferal.findOne(query)
+    .exec((err, referal) => {
+        if (err) return res.send(500).send(err);
+        res.json(referal)
+    });
+}
+
 exports.updateSingleReferal = function (req, res){
     const doc = req.body;
-    const { productID, referalID } = req.params;
+    const { referalID } = req.params;
     const query = {
-        product: productID,
         _id: referalID
     };
     UserReferal

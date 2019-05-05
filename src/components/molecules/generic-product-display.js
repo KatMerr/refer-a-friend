@@ -3,39 +3,24 @@ import styled from 'styled-components'
 import PropTypes from 'prop-types'
 import GenericCardImage from '../../images/generic_bank.png'
 import Image from '../atoms/image'
+import ProductTitle from '../atoms/product-title'
 
 const GenericProductDisplay = styled.div`
-    width: 75%;
-    margin: 0 auto;
-`;
-
-const ImageContainer = styled.div`
-    display: inline-block;
-    width: 33%;
-`;
-
-const InformationContainer = styled.div`
-    display: inline-block;
-    width: 67%;
-    vertical-align: top;
-    padding: 40px 0 20px 20px;
-    text-align: left;
-    box-sizing: border-box;
+    margin: 20px auto;
+    display: grid;
+    grid-template-columns: 33% 67%;
+    grid-template-rows: 100%;
+    min-height: 200px;
 `;
 
 const renderGenericProductDisplay = function(props){
     let { image, name, bonus } = props.product;
+    image = image.imageURL || GenericCardImage;
 
-    console.log(props.product);
-    image = GenericCardImage;
     return (
         <GenericProductDisplay>
-            <ImageContainer>
-                <Image src={image} alt={"Image of " + name}></Image>
-            </ImageContainer>
-            <InformationContainer>
-                <div>{name}</div>
-            </InformationContainer>
+            <Image src={image} alt={"Image of " + name}></Image>
+            <ProductTitle>{name}</ProductTitle>
         </GenericProductDisplay>
     );
 };

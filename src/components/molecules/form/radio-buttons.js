@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import PropTypes from 'prop-types'
 import Button from '../../atoms/button'
@@ -11,26 +11,17 @@ const ButtonsContainer = styled.div`
 `;
 
 const renderRadioButtons = function(props){
-    const { labelValue, onButtonClick, required, toolTip } = props;
 
-    const [ buttons, setButtons ] = useState(props.buttons);
-
-    function handleButtonClick(selectedButton){
-        //Controlled Component Functionality
-        onButtonClick(selectedButton.value);
-        //Deselect All Other Buttons and Select
-        let buttonsClone = buttons.slice(0);
-        buttonsClone.map(button => {
-            if (button.name === selectedButton.name) button.active = true;
-            else button.active = false;
-        });
-        setButtons(buttonsClone);
-    }
+    const { buttons, label, onButtonClick, required, toolTip, value } = props;
+    const [ selectedButton, setSelectedButton] = useState(value);
+    
+    useEffect(() => setSelectedButton(value), [value]);
+    
     return(
         <FieldWrapper>
-            {(labelValue) ? 
+            {(label) ? 
                 <Label required={required}>
-                    { labelValue }
+                    { label }
                     { (toolTip) ? <ToolTip>{ toolTip }</ToolTip> : null }
                 </Label>
                 : null
@@ -39,11 +30,11 @@ const renderRadioButtons = function(props){
                 {
                     buttons.map((button, i) => 
                         <Button
-                            active={button.active}
+                            active={button.value === selectedButton}
                             disabled={button.disabled}
                             key={i}
                             name={button.name}
-                            onClick={(e) => handleButtonClick(e.target)}
+                            onClick={(e) => onButtonClick(e.target.value)}
                             type="button"
                             variant="secondary"
                             value={button.value}>{button.name}</Button>
@@ -60,7 +51,7 @@ renderRadioButtons.defaultProps = {
 
 renderRadioButtons.propTypes = {
     buttons: PropTypes.array.isRequired,
-    labelValue: PropTypes.string,
+    label: PropTypes.string,
     onButtonClick: PropTypes.func.isRequired,
     required: PropTypes.bool,
     toolTip: PropTypes.string

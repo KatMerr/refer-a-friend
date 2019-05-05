@@ -2,17 +2,19 @@ import React from 'react'
 import Styled, { css } from 'styled-components'
 import PropTypes from 'prop-types'
 import { Colors } from '../../utils/style-globals'
+import { Link } from 'react-router-dom'
 
 const List = Styled.div`
     max-height: 500px;
-    background-color: white;
-    color: black;
+    background-color: ${Colors.white};
+    color: ${Colors.black};
     display: block;
     position: absolute;
     width: 100%;
     z-index: 1;
-    border: 1px solid black;
+    border: 1px solid ${Colors.black};
     overflow: hidden;
+    box-sizing: border-box;
 
     ${(props) => props.variant === "rounded" && css`
         border-bottom-left-radius: 10px;
@@ -23,6 +25,7 @@ const List = Styled.div`
 const Item = Styled.div`
     padding: 10px 5px;
     cursor: pointer;
+    color: ${Colors.black};
 
     &:hover {
         background-color: ${Colors.darkGreen};
@@ -38,8 +41,12 @@ const Item = Styled.div`
     `}
 `;
 
+const StyledLink = Styled(Link)`
+    color: inherit;
+`;
+
 const renderItemList = function(props){
-    const { handleMouseEnter, handleMouseLeave, handleItemClick, items, noItemsText, scrollIndex, showList, variant } = props;
+    const { handleMouseEnter, handleMouseLeave, handleItemClick, items, noItemsRedirectRoute, noItemsText, scrollIndex, showList, variant } = props;
 
     return (
         (showList) ? 
@@ -53,7 +60,8 @@ const renderItemList = function(props){
                                 return <Item key={i} onClick={() => handleItemClick(item)}>{item.name}</Item>
                             }
                         })
-                        : <Item>{noItemsText}</Item>
+                        : (noItemsRedirectRoute) ? <Item><StyledLink to={noItemsRedirectRoute}>{noItemsText}</StyledLink></Item>
+                                        : <Item>{noItemsText}</Item>
                 }
             </List>
             : null
@@ -62,7 +70,7 @@ const renderItemList = function(props){
 
 renderItemList.defaultProps = {
     items: [],
-    noItemsText: "Can't find what you're looking for? Click here.",
+    noItemsText: "Sorry, no items found.",
     showList: true
 
 };
@@ -73,6 +81,7 @@ renderItemList.propTypes = {
     handleMouseLeave: PropTypes.func,
     handleItemClick: PropTypes.func.isRequired,
     items: PropTypes.array.isRequired,
+    noItemsRedirectRoute: PropTypes.string,
     noItemsText: PropTypes.string,
     showList: PropTypes.bool
 };

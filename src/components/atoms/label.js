@@ -1,18 +1,19 @@
 import React from 'react'
 import styled from 'styled-components'
 import PropTypes from 'prop-types'
+import { Colors } from '../../utils/style-globals'
 
 const Label = styled.label`
-    color: black;
+    color: ${Colors.black};
     display: inline-block;
     text-decoration: underline;
     margin-bottom: 10px;
 `
 
 const renderLabel = function(props){
-    const { required } = props;
+    const { className, required } = props;
     return (
-        <Label htmlFor={props.for}>{(required) ? "*" : null}{props.children}</Label>
+        <Label className={className} htmlFor={props.for}>{(required) ? "*" : null}{props.children}</Label>
     )
 }
 
